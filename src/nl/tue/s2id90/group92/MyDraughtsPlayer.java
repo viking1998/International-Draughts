@@ -115,11 +115,30 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             throws AIStoppedException {
         if (stopped) { stopped = false; throw new AIStoppedException(); }
         DraughtsState state = node.getState();
+        if (depth == 0)
+        {
+            return evaluate(state);
+        }
+        
+        node.setBestMove(state.getMoves().get(0));
+        for (Move m : state.getMoves())
+        {
+            state.doMove(m);
+            
+            int oldBeta = beta;
+            beta = Integer.min(beta, alphaBetaMax(new DraughtsNode(state.clone()), alpha, beta, depth-1));
+            
+            if (beta <= alpha) { return alpha; }
+            
+            if (oldBeta != beta)
+            {
+                node.setBestMove(m);
+            }
+            
+            state.undoMove(m);
+        }
         // ToDo: write an alphabeta search to compute bestMove and value
-        Move bestMove = state.getMoves().get(0);
-        int value = 0;
-        node.setBestMove(bestMove);
-        return value;
+        return beta;
      }
     
     int alphaBetaMax(DraughtsNode node, int alpha, int beta, int depth)
