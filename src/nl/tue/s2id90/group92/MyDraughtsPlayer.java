@@ -169,4 +169,5 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     /** A method that evaluates the given state. */
     // ToDo: write an appropriate evaluation function
     int evaluate(DraughtsState state) { return 0; }
+    
 }
