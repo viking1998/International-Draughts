@@ -37,7 +37,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
                 bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, depth);
             
                 // store the bestMove found uptill now
-                // NB this is not done in case of an AIStoppedException in alphaBeat()
+                // NB this is not done in case of an AIStoppedException in alphaBetа()
                 bestMove  = node.getBestMove();
             }
             
