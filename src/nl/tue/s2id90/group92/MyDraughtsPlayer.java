@@ -35,7 +35,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             // do this with iterative deepening, i.e. start from depth 1 and go further
             for(int depth = 1; depth <= maxSearchDepth; depth++){
                 bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, depth);
-            
+                
                 // store the bestMove found uptill now
                 // NB this is not done in case of an AIStoppedException in alphaBetа()
                 bestMove  = node.getBestMove();
@@ -90,10 +90,59 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     int alphaBeta(DraughtsNode node, int alpha, int beta, int depth)
             throws AIStoppedException
     {
-        if (node.getState().isWhiteToMove()) {
-            return alphaBetaMax(node, alpha, beta, depth);
-        } else  {
-            return alphaBetaMin(node, alpha, beta, depth);
+        Move bestMove = node.getBestMove();
+        if(bestMove == null){
+            if (node.getState().isWhiteToMove()) {
+                return alphaBetaMax(node, alpha, beta, depth);
+            } else  {
+                return alphaBetaMin(node, alpha, beta, depth);
+            }
+        } else{
+            if (stopped) { stopped = false; throw new AIStoppedException(); }
+            DraughtsState state = node.getState();
+            if (state.getMoves().isEmpty()){
+                return evaluate(state);
+            }
+            if (node.getState().isWhiteToMove()) {
+
+                state.doMove(bestMove);
+                alpha = alphaBetaMin(new DraughtsNode(state.clone()), 
+                                            alpha, beta, depth - 1);
+                state.undoMove(bestMove);
+                for (Move m : state.getMoves()){
+                    state.doMove(m);
+                    int newAlpha = alphaBetaMin(new DraughtsNode(state.clone()), 
+                                                        alpha, beta, depth - 1);
+                    if(newAlpha >= beta){
+                        return beta;
+                    }
+                    if (newAlpha > alpha){
+                        alpha = newAlpha;
+                        node.setBestMove(m);
+                    }
+                    state.undoMove(m);
+                }
+                return alpha;   
+            } else  {
+                state.doMove(bestMove);
+                alpha = alphaBetaMax(new DraughtsNode(state.clone()), 
+                                            alpha, beta, depth - 1);
+                state.undoMove(bestMove);
+                for (Move m : state.getMoves()){
+                    state.doMove(m);
+                        
+                    int oldBeta = beta;
+                        beta = Integer.min(beta, alphaBetaMax(new DraughtsNode(state.clone()), alpha, beta, depth-1));
+                        
+                    if (beta <= alpha) { return alpha; }
+                
+                    if (oldBeta != beta){
+                        node.setBestMove(m);
+                    }
+                    state.undoMove(m);
+                }
+                return beta;
+            }
         }
     }
     
@@ -176,16 +225,25 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     {
         int[] pieces = state.getPieces();
         int num_pieces = 0;
-        
+        int num_whites = 0, num_blacks = 0;
+        int num_kwhites = 0, num_kblacks = 0;
         for (int i = 1; i < pieces.length; i++)
         {
             if (pieces[i] != DraughtsState.EMPTY)
             {
                 num_pieces++;
             }
+            if(pieces[i] == DraughtsState.BLACKPIECE)
+                num_blacks ++;
+            if(pieces[i] == DraughtsState.BLACKKING)
+                num_kblacks ++;
+            if(pieces[i] == DraughtsState.WHITEPIECE)
+                num_whites ++;
+            if(pieces[i] == DraughtsState.WHITEKING)
+                num_kwhites ++;
         }
         
-        return num_pieces;
+        return num_whites+3*num_kwhites-num_blacks-3*num_kblacks;
     }
     
 }
