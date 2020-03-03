@@ -101,10 +101,9 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             if (stopped) { stopped = false; throw new AIStoppedException(); }
             DraughtsState state = node.getState();
             if (state.getMoves().isEmpty()){
-                return evaluate(state);
+                return evaluate1(state);
             }
             if (node.getState().isWhiteToMove()) {
-
                 state.doMove(bestMove);
                 alpha = alphaBetaMin(new DraughtsNode(state.clone()), 
                                             alpha, beta, depth - 1);
@@ -124,24 +123,25 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
                 }
                 return alpha;   
             } else  {
-                state.doMove(bestMove);
-                alpha = alphaBetaMax(new DraughtsNode(state.clone()), 
+                /*state.doMove(bestMove);
+                beta = alphaBetaMax(new DraughtsNode(state.clone()), 
                                             alpha, beta, depth - 1);
                 state.undoMove(bestMove);
                 for (Move m : state.getMoves()){
                     state.doMove(m);
-                        
-                    int oldBeta = beta;
-                        beta = Integer.min(beta, alphaBetaMax(new DraughtsNode(state.clone()), alpha, beta, depth-1));
-                        
-                    if (beta <= alpha) { return alpha; }
-                
-                    if (oldBeta != beta){
+                    int newBeta = alphaBetaMax(new DraughtsNode(state.clone()), 
+                                                        alpha, beta, depth - 1);
+                    if(newBeta >= alpha){
+                        return alpha;
+                    }
+                    if (newBeta > beta){
+                        beta = newBeta;
                         node.setBestMove(m);
                     }
                     state.undoMove(m);
                 }
-                return beta;
+                return beta;*/
+                return alphaBetaMin(node, alpha, beta, depth);
             }
         }
     }
@@ -169,7 +169,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         DraughtsState state = node.getState();
         if (depth == 0 || state.getMoves().isEmpty())
         {
-            return evaluate(state);
+            return evaluate1(state);
         }
 
         for (Move m : state.getMoves())
@@ -188,7 +188,6 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             
             state.undoMove(m);
         }
-        // ToDo: write an alphabeta search to compute bestMove and value
         return beta;
      }
     
@@ -199,7 +198,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         // ToDo: write an alphabeta search to compute bestMove and value
         if (depth == 0 || state.getMoves().isEmpty())
         {
-            return evaluate(state);
+            return evaluate1(state);
         }
 
         for (Move m : state.getMoves())
@@ -220,16 +219,14 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     }
 
     /** A method that evaluates the given state. */
-    // ToDo: write an appropriate evaluation function
-    int evaluate(DraughtsState state) 
-    {
+    int evaluate(DraughtsState state) {
         int[] pieces = state.getPieces();
         int num_pieces = 0;
         int num_whites = 0, num_blacks = 0;
         int num_kwhites = 0, num_kblacks = 0;
         for (int i = 1; i < pieces.length; i++)
         {
-            if (pieces[i] != DraughtsState.EMPTY)
+            if (pieces[i] == DraughtsState.EMPTY)
             {
                 num_pieces++;
             }
@@ -243,7 +240,53 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
                 num_kwhites ++;
         }
         
-        return num_whites+3*num_kwhites-num_blacks-3*num_kblacks;
+        return  num_whites+3*num_kwhites-num_blacks-3*num_kblacks;
     }
     
+    int evaluate1(DraughtsState state) 
+    {
+        int[] pieces = state.getPieces();
+        int num_pieces = 0;
+        int score_black = 0;
+        int score_white = 0;
+        int[]blackscores ={0, 4, 3, 2, 2, 3,
+                            4, 2, 2, 3, 2,
+                              3, 4, 5, 4, 3,
+                            6, 5, 5, 4, 4,
+                              4, 5, 4, 4, 5,
+                            7, 6, 5, 5, 6,
+                              4, 5, 6, 6, 7,
+                            7, 6, 7, 7, 7,
+                              7, 7, 9, 8, 9,
+                            10, 9, 10, 10, 10
+        };
+        int[]whitescores ={0, 10, 10, 10, 9, 10,
+                            9, 8, 9, 7,  7,
+                              7,  7, 7, 6, 7,
+                            7, 6,  6, 5, 4,
+                              6,  5, 5, 6, 7,
+                            5, 4,  4, 5, 4,
+                              4,  4, 5, 5, 6,
+                            3, 4,  5, 4, 3,
+                              2,  3, 2, 2, 4,
+                            3,  2, 2, 3, 4
+        };
+        for (int i = 1; i < pieces.length; i++)
+        {
+            if (pieces[i] != DraughtsState.EMPTY)
+            {
+                num_pieces++;
+            }
+            if(pieces[i] == DraughtsState.BLACKPIECE)
+                score_black += blackscores[i];
+            if(pieces[i] == DraughtsState.BLACKKING)
+                score_black += blackscores[i]+2;
+            if(pieces[i] == DraughtsState.WHITEPIECE)
+                score_white += whitescores[i];
+            if(pieces[i] == DraughtsState.WHITEKING)
+                score_white += whitescores[i]+2;
+        }
+        
+        return score_white - score_black;
+    }
 }
