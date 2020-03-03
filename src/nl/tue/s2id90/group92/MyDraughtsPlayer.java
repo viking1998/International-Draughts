@@ -33,7 +33,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         try {
             // compute bestMove and bestValue in a call to alphabeta
             // do this with iterative deepening, i.e. start from depth 1 and go further
-            for(int depth = 1; depth <= maxSearchDepth; depth++){
+            for(int depth = 1; depth <= 20; depth++){
                 bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, depth);
                 
                 // store the bestMove found uptill now
@@ -249,7 +249,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         int num_pieces = 0;
         int score_black = 0;
         int score_white = 0;
-        int[]blackscores ={0, 4, 3, 2, 2, 3,
+        int[]blackscores ={0, 5, 4, 3, 4, 4,
                             4, 2, 2, 3, 2,
                               3, 4, 5, 4, 3,
                             6, 5, 5, 4, 4,
@@ -269,7 +269,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
                               4,  4, 5, 5, 6,
                             3, 4,  5, 4, 3,
                               2,  3, 2, 2, 4,
-                            3,  2, 2, 3, 4
+                            5,  4, 3, 4, 4
         };
         for (int i = 1; i < pieces.length; i++)
         {
