@@ -31,8 +31,16 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         bestValue = 0;
         DraughtsNode node = new DraughtsNode(s.clone());    // the root of the search tree
         try {
-            // compute bestMove and bestValue in a call to alphabeta
-            // do this with iterative deepening, i.e. start from depth 1 and go further
+            /* compute bestMove and bestValue in a call to alphabeta
+             * do this with iterative deepening, i.e. start from depth 1 and go further
+             * We attempted to do a best-first search, going down the tree of the
+             * best move found from the last call (from depth 2 onwards). It however
+             * did not prove to speed up the search, rather contrary.
+             *
+             * Apologies if you wanted us to only search up to maxSearchDepth, we found that it 
+             * did not use up all the computation time if that were the case. 20 is plenty depth
+             * for the search to always continue up to the time limit.
+            */
             for(int depth = 1; depth <= 20; depth++){
                 bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, depth);
                 
@@ -213,7 +221,8 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
      * The table was initially referenced from:
      * http://etheses.dur.ac.uk/7770/1/Masters_Thesis_Final.pdf?DDD10+ ,
      * they have been modified to fit a 10x10 table and have been experimented
-     * with to provide sufficient results.
+     * with to provide sufficient results. All values have been scaled to not
+     * have to use floating point numbers.
      * 
      * We also tried flat piece counting by colour and status, however 
      * that proved inferior to this method.
