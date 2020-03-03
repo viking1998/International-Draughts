@@ -90,59 +90,71 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     int alphaBeta(DraughtsNode node, int alpha, int beta, int depth)
             throws AIStoppedException
     {
-        Move bestMove = node.getBestMove();
-        if(bestMove == null){
-            if (node.getState().isWhiteToMove()) {
-                return alphaBetaMax(node, alpha, beta, depth);
-            } else  {
-                return alphaBetaMin(node, alpha, beta, depth);
-            }
-        } else{
-            if (stopped) { stopped = false; throw new AIStoppedException(); }
-            DraughtsState state = node.getState();
-            if (state.getMoves().isEmpty()){
-                return evaluate(state);
-            }
-            if (node.getState().isWhiteToMove()) {
-
-                state.doMove(bestMove);
-                alpha = alphaBetaMin(new DraughtsNode(state.clone()), 
-                                            alpha, beta, depth - 1);
-                state.undoMove(bestMove);
-                for (Move m : state.getMoves()){
-                    state.doMove(m);
-                    int newAlpha = alphaBetaMin(new DraughtsNode(state.clone()), 
-                                                        alpha, beta, depth - 1);
-                    if(newAlpha >= beta){
-                        return beta;
-                    }
-                    if (newAlpha > alpha){
-                        alpha = newAlpha;
-                        node.setBestMove(m);
-                    }
-                    state.undoMove(m);
-                }
-                return alpha;   
-            } else  {
-                state.doMove(bestMove);
-                alpha = alphaBetaMax(new DraughtsNode(state.clone()), 
-                                            alpha, beta, depth - 1);
-                state.undoMove(bestMove);
-                for (Move m : state.getMoves()){
-                    state.doMove(m);
-                        
-                    int oldBeta = beta;
-                        beta = Integer.min(beta, alphaBetaMax(new DraughtsNode(state.clone()), alpha, beta, depth-1));
-                        
-                    if (beta <= alpha) { return alpha; }
-                
-                    if (oldBeta != beta){
-                        node.setBestMove(m);
-                    }
-                    state.undoMove(m);
-                }
-                return beta;
-            }
+//        Move bestMove = node.getBestMove();
+//        if (bestMove == null) {
+//            if (node.getState().isWhiteToMove()) {
+//                return alphaBetaMax(node, alpha, beta, depth);
+//            } else  {
+//                return alphaBetaMin(node, alpha, beta, depth);
+//            }
+//        } else {
+//            if (stopped) { stopped = false; throw new AIStoppedException(); }
+//            DraughtsState state = node.getState();
+//            
+//            if (state.isWhiteToMove()) {
+//                alpha = bestValue;
+//                
+//                state.doMove(bestMove);
+//                int newAlpha = Integer.max(alpha, alphaBetaMin(new DraughtsNode(state.clone()), 
+//                                            alpha, beta, depth - 1));
+//                
+//                if (newAlpha > alpha){
+//                    alpha = newAlpha;
+//                }                
+//                state.undoMove(bestMove);
+//                
+//                for (Move m : state.getMoves()){
+//                    state.doMove(m);
+//                    newAlpha = Integer.max(alpha, alphaBetaMin(new DraughtsNode(state.clone()), 
+//                                                        alpha, beta, depth - 1));
+//                    
+//                    if (newAlpha > alpha){
+//                        alpha = newAlpha;
+//                        node.setBestMove(m);
+//                    }
+//                    state.undoMove(m);
+//                }
+//                return alpha;   
+//            } else {
+//                beta = bestValue;
+//                
+//                state.doMove(bestMove);
+//                int newBeta = alphaBetaMin(new DraughtsNode(state.clone()), 
+//                                            alpha, beta, depth - 1);
+//                if (newBeta < beta){
+//                    beta = newBeta;
+//                }                
+//                state.undoMove(bestMove);
+//                for (Move m : state.getMoves()){
+//                    state.doMove(m);
+//                        
+//                        newBeta = Integer.min(beta, 
+//                                            alphaBetaMax(new DraughtsNode(state.clone()),
+//                                                        alpha, beta, depth-1));
+//                
+//                    if (newBeta < beta){
+//                        beta = newBeta;
+//                        node.setBestMove(m);
+//                    }
+//                    state.undoMove(m);
+//                }
+//                return beta;
+//            }
+//        }
+        if (node.getState().isWhiteToMove()) {
+            return alphaBetaMax(node, alpha, beta, depth);
+        } else  {
+            return alphaBetaMin(node, alpha, beta, depth);
         }
     }
     
@@ -176,13 +188,15 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         {
             state.doMove(m);
             
-            int oldBeta = beta;
-            beta = Integer.min(beta, alphaBetaMax(new DraughtsNode(state.clone()), alpha, beta, depth-1));
+            int newBeta = Integer.min(beta,
+                                    alphaBetaMax(new DraughtsNode(state.clone()),
+                                                          alpha, beta, depth-1));
             
-            if (beta <= alpha) { return alpha; }
+            if (newBeta <= alpha) { return alpha; }
             
-            if (oldBeta != beta)
+            if (newBeta < beta)
             {
+                beta = newBeta;
                 node.setBestMove(m);
             }
             
@@ -205,15 +219,20 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         for (Move m : state.getMoves())
         {
             state.doMove(m);
-            int newAlpha = alphaBetaMin(new DraughtsNode(state.clone()), 
-                                                alpha, beta, depth - 1);
+            
+            int newAlpha = Integer.max(alpha, 
+                                    alphaBetaMin(new DraughtsNode(state.clone()),
+                                                        alpha, beta, depth - 1));
+            
             if(newAlpha >= beta){
                 return beta;
             }
+            
             if (newAlpha > alpha){
                 alpha = newAlpha;
                 node.setBestMove(m);
             }
+            
             state.undoMove(m);
         }
         return alpha;
@@ -224,15 +243,10 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     int evaluate(DraughtsState state) 
     {
         int[] pieces = state.getPieces();
-        int num_pieces = 0;
         int num_whites = 0, num_blacks = 0;
         int num_kwhites = 0, num_kblacks = 0;
         for (int i = 1; i < pieces.length; i++)
         {
-            if (pieces[i] != DraughtsState.EMPTY)
-            {
-                num_pieces++;
-            }
             if(pieces[i] == DraughtsState.BLACKPIECE)
                 num_blacks ++;
             if(pieces[i] == DraughtsState.BLACKKING)
