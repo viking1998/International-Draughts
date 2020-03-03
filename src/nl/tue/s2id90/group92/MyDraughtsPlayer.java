@@ -22,7 +22,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     private boolean stopped;
 
     public MyDraughtsPlayer(int maxSearchDepth) {
-        super("best.png"); // ToDo: replace with your own icon
+        super("best.png");
         this.maxSearchDepth = maxSearchDepth;
     }
     
@@ -32,11 +32,14 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         DraughtsNode node = new DraughtsNode(s.clone());    // the root of the search tree
         try {
             // compute bestMove and bestValue in a call to alphabeta
-            bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth);
+            // do this with iterative deepening, i.e. start from depth 1 and go further
+            for(int depth = 1; depth <= maxSearchDepth; depth++){
+                bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, depth);
             
-            // store the bestMove found uptill now
-            // NB this is not done in case of an AIStoppedException in alphaBeat()
-            bestMove  = node.getBestMove();
+                // store the bestMove found uptill now
+                // NB this is not done in case of an AIStoppedException in alphaBetа()
+                bestMove  = node.getBestMove();
+            }
             
             // print the results for debugging reasons
             System.err.format(
