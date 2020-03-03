@@ -4,7 +4,6 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import nl.tue.s2id90.draughts.DraughtsState;
 import nl.tue.s2id90.draughts.player.DraughtsPlayer;
 import org10x10.dam.game.Move;
@@ -101,9 +100,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         } else{
             if (stopped) { stopped = false; throw new AIStoppedException(); }
             DraughtsState state = node.getState();
-            if (state.getMoves().isEmpty()){
-                return evaluate1(state);
-            }
+            
             if (node.getState().isWhiteToMove()) {
                 state.doMove(bestMove);
                 alpha = alphaBetaMin(new DraughtsNode(state.clone()), 
@@ -124,24 +121,6 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
                 }
                 return alpha;   
             } else  {
-                /*state.doMove(bestMove);
-                beta = alphaBetaMax(new DraughtsNode(state.clone()), 
-                                            alpha, beta, depth - 1);
-                state.undoMove(bestMove);
-                for (Move m : state.getMoves()){
-                    state.doMove(m);
-                    int newBeta = alphaBetaMax(new DraughtsNode(state.clone()), 
-                                                        alpha, beta, depth - 1);
-                    if(newBeta >= alpha){
-                        return alpha;
-                    }
-                    if (newBeta > beta){
-                        beta = newBeta;
-                        node.setBestMove(m);
-                    }
-                    state.undoMove(m);
-                }
-                return beta;*/
                 return alphaBetaMin(node, alpha, beta, depth);
             }
         }
@@ -170,20 +149,22 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         DraughtsState state = node.getState();
         if (depth == 0 || state.getMoves().isEmpty())
         {
-            return evaluate1(state);
+            return evaluate(state);
         }
 
         for (Move m : state.getMoves())
         {
             state.doMove(m);
             
-            int oldBeta = beta;
-            beta = Integer.min(beta, alphaBetaMax(new DraughtsNode(state.clone()), alpha, beta, depth-1));
+            int newBeta = Integer.min(beta,
+                                    alphaBetaMax(new DraughtsNode(state.clone()),
+                                                          alpha, beta, depth-1));
             
-            if (beta <= alpha) { return alpha; }
+            if (newBeta <= alpha) { return alpha; }
             
-            if (oldBeta != beta)
+            if (newBeta < beta)
             {
+                beta = newBeta;
                 node.setBestMove(m);
             }
             
@@ -196,55 +177,36 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             throws AIStoppedException {
         if (stopped) { stopped = false; throw new AIStoppedException(); }
         DraughtsState state = node.getState();
-        // ToDo: write an alphabeta search to compute bestMove and value
+
         if (depth == 0 || state.getMoves().isEmpty())
         {
-            return evaluate1(state);
+            return evaluate(state);
         }
 
         for (Move m : state.getMoves())
         {
             state.doMove(m);
-            int newAlpha = alphaBetaMin(new DraughtsNode(state.clone()), 
-                                                alpha, beta, depth - 1);
+            
+            int newAlpha = Integer.max(alpha, 
+                                    alphaBetaMin(new DraughtsNode(state.clone()),
+                                                        alpha, beta, depth - 1));
+            
             if(newAlpha >= beta){
                 return beta;
             }
+            
             if (newAlpha > alpha){
                 alpha = newAlpha;
                 node.setBestMove(m);
             }
+            
             state.undoMove(m);
         }
         return alpha;
     }
-
-    /** A method that evaluates the given state. */
-    int evaluate(DraughtsState state) {
-        int[] pieces = state.getPieces();
-        int num_pieces = 0;
-        int num_whites = 0, num_blacks = 0;
-        int num_kwhites = 0, num_kblacks = 0;
-        for (int i = 1; i < pieces.length; i++)
-        {
-            if (pieces[i] == DraughtsState.EMPTY)
-            {
-                num_pieces++;
-            }
-            if(pieces[i] == DraughtsState.BLACKPIECE)
-                num_blacks ++;
-            if(pieces[i] == DraughtsState.BLACKKING)
-                num_kblacks ++;
-            if(pieces[i] == DraughtsState.WHITEPIECE)
-                num_whites ++;
-            if(pieces[i] == DraughtsState.WHITEKING)
-                num_kwhites ++;
-        }
-        
-        return  num_whites+3*num_kwhites-num_blacks-3*num_kblacks;
-    }
     
-    int evaluate1(DraughtsState state) 
+    /** A method that evaluates the given state. */
+    int evaluate(DraughtsState state) 
     {
         int[] pieces = state.getPieces();
         int num_pieces = 0;
@@ -274,10 +236,6 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         };
         for (int i = 1; i < pieces.length; i++)
         {
-            if (pieces[i] != DraughtsState.EMPTY)
-            {
-                num_pieces++;
-            }
             if(pieces[i] == DraughtsState.BLACKPIECE)
                 score_black += blackscores[i];
             if(pieces[i] == DraughtsState.BLACKKING)
@@ -287,8 +245,6 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             if(pieces[i] == DraughtsState.WHITEKING)
                 score_white += whitescores[i]+20;
         }
-        //Random random = new Random();
-        //int score_random = 0;// random.nextInt(3) - 1;
-        return score_white - score_black;// + score_random;
+        return score_white - score_black;
     }
 }
