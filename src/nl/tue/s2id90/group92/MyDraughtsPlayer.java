@@ -225,17 +225,25 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     {
         int[] pieces = state.getPieces();
         int num_pieces = 0;
-        /*int num_whites = 0, num_blacks = 0;
-        int num_kwhites = 0, num_kblacks = 0;*/
+        int num_whites = 0, num_blacks = 0;
+        int num_kwhites = 0, num_kblacks = 0;
         for (int i = 1; i < pieces.length; i++)
         {
             if (pieces[i] != DraughtsState.EMPTY)
             {
                 num_pieces++;
             }
+            if(pieces[i] == DraughtsState.BLACKPIECE)
+                num_blacks ++;
+            if(pieces[i] == DraughtsState.BLACKKING)
+                num_kblacks ++;
+            if(pieces[i] == DraughtsState.WHITEPIECE)
+                num_whites ++;
+            if(pieces[i] == DraughtsState.WHITEKING)
+                num_kwhites ++;
         }
         
-        return num_pieces;
+        return num_whites+3*num_kwhites-num_blacks-3*num_kblacks;
     }
     
 }
