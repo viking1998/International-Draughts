@@ -14,14 +14,14 @@ import org10x10.dam.game.Move;
  */
 // ToDo: rename this class (and hence this file) to have a distinct name
 //       for your player during the tournament
-public class MyDraughtsPlayer  extends DraughtsPlayer{
+public class VeselinTopalov  extends DraughtsPlayer{
     private int bestValue=0;
     int maxSearchDepth;
     
     /** boolean that indicates that the GUI asked the player to stop thinking. */
     private boolean stopped;
 
-    public MyDraughtsPlayer(int maxSearchDepth) {
+    public VeselinTopalov(int maxSearchDepth) {
         super("best.png");
         this.maxSearchDepth = maxSearchDepth;
     }
@@ -33,7 +33,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         try {
             // compute bestMove and bestValue in a call to alphabeta
             // do this with iterative deepening, i.e. start from depth 1 and go further
-            for(int depth = 1; depth <= 20; depth++){
+            for(int depth = 1; depth <= maxSearchDepth; depth++){
                 bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, depth);
                 
                 // store the bestMove found uptill now
@@ -90,39 +90,10 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     int alphaBeta(DraughtsNode node, int alpha, int beta, int depth)
             throws AIStoppedException
     {
-        Move bestMove = node.getBestMove();
-        if(bestMove == null){
-            if (node.getState().isWhiteToMove()) {
-                return alphaBetaMax(node, alpha, beta, depth);
-            } else  {
-                return alphaBetaMin(node, alpha, beta, depth);
-            }
-        } else{
-            if (stopped) { stopped = false; throw new AIStoppedException(); }
-            DraughtsState state = node.getState();
-            
-            if (node.getState().isWhiteToMove()) {
-                state.doMove(bestMove);
-                alpha = alphaBetaMin(new DraughtsNode(state.clone()), 
-                                            alpha, beta, depth - 1);
-                state.undoMove(bestMove);
-                for (Move m : state.getMoves()){
-                    state.doMove(m);
-                    int newAlpha = alphaBetaMin(new DraughtsNode(state.clone()), 
-                                                        alpha, beta, depth - 1);
-                    if(newAlpha >= beta){
-                        return beta;
-                    }
-                    if (newAlpha > alpha){
-                        alpha = newAlpha;
-                        node.setBestMove(m);
-                    }
-                    state.undoMove(m);
-                }
-                return alpha;   
-            } else  {
-                return alphaBetaMin(node, alpha, beta, depth);
-            }
+        if (node.getState().isWhiteToMove()) {
+            return alphaBetaMax(node, alpha, beta, depth);
+        } else  {
+            return alphaBetaMin(node, alpha, beta, depth);
         }
     }
     
@@ -147,6 +118,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             throws AIStoppedException {
         if (stopped) { stopped = false; throw new AIStoppedException(); }
         DraughtsState state = node.getState();
+        
         if (depth == 0 || state.getMoves().isEmpty())
         {
             return evaluate(state);
