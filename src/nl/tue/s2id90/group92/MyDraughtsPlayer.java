@@ -22,7 +22,7 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
     private boolean stopped;
 
     public MyDraughtsPlayer(int maxSearchDepth) {
-        super("best.png"); // ToDo: replace with your own icon
+        super("best.png");
         this.maxSearchDepth = maxSearchDepth;
     }
     
@@ -32,11 +32,14 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         DraughtsNode node = new DraughtsNode(s.clone());    // the root of the search tree
         try {
             // compute bestMove and bestValue in a call to alphabeta
-            bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth);
+            // do this with iterative deepening, i.e. start from depth 1 and go further
+            for(int depth = 1; depth <= maxSearchDepth; depth++){
+                bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, depth);
             
-            // store the bestMove found uptill now
-            // NB this is not done in case of an AIStoppedException in alphaBeat()
-            bestMove  = node.getBestMove();
+                // store the bestMove found uptill now
+                // NB this is not done in case of an AIStoppedException in alphaBetа()
+                bestMove  = node.getBestMove();
+            }
             
             // print the results for debugging reasons
             System.err.format(
@@ -115,12 +118,11 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             throws AIStoppedException {
         if (stopped) { stopped = false; throw new AIStoppedException(); }
         DraughtsState state = node.getState();
-        if (depth == 0)
+        if (depth == 0 || state.getMoves().isEmpty())
         {
             return evaluate(state);
         }
-        
-        node.setBestMove(state.getMoves().get(0));
+
         for (Move m : state.getMoves())
         {
             state.doMove(m);
@@ -146,11 +148,13 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         if (stopped) { stopped = false; throw new AIStoppedException(); }
         DraughtsState state = node.getState();
         // ToDo: write an alphabeta search to compute bestMove and value
-        if(depth == 0){
+        if (depth == 0 || state.getMoves().isEmpty())
+        {
             return evaluate(state);
         }
-        node.setBestMove(state.getMoves().get(0));
-        for(Move m : state.getMoves()){
+
+        for (Move m : state.getMoves())
+        {
             state.doMove(m);
             int newAlpha = alphaBetaMin(new DraughtsNode(state.clone()), 
                                                 alpha, beta, depth - 1);
@@ -168,5 +172,20 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
 
     /** A method that evaluates the given state. */
     // ToDo: write an appropriate evaluation function
-    int evaluate(DraughtsState state) { return 0; }
+    int evaluate(DraughtsState state) 
+    {
+        int[] pieces = state.getPieces();
+        int num_pieces = 0;
+        
+        for (int i = 1; i < pieces.length; i++)
+        {
+            if (pieces[i] != DraughtsState.EMPTY)
+            {
+                num_pieces++;
+            }
+        }
+        
+        return num_pieces;
+    }
+    
 }

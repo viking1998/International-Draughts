@@ -1,8 +1,8 @@
 package nl.tue.s2id90.group92;
 
-import nl.tue.s2id90.group92.samples.UninformedPlayer;
-import nl.tue.s2id90.group92.samples.OptimisticPlayer;
-import nl.tue.s2id90.group92.samples.BuggyPlayer;
+import nl.tue.s2id90.groupNN.samples.UninformedPlayer;
+import nl.tue.s2id90.groupNN.samples.OptimisticPlayer;
+import nl.tue.s2id90.groupNN.samples.BuggyPlayer;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import nl.tue.s2id90.draughts.DraughtsPlayerProvider;
 import nl.tue.s2id90.draughts.DraughtsPlugin;
