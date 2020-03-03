@@ -115,12 +115,11 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             throws AIStoppedException {
         if (stopped) { stopped = false; throw new AIStoppedException(); }
         DraughtsState state = node.getState();
-        if (depth == 0)
+        if (depth == 0 || state.getMoves().isEmpty())
         {
             return evaluate(state);
         }
-        
-        node.setBestMove(state.getMoves().get(0));
+
         for (Move m : state.getMoves())
         {
             state.doMove(m);
@@ -146,11 +145,13 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         if (stopped) { stopped = false; throw new AIStoppedException(); }
         DraughtsState state = node.getState();
         // ToDo: write an alphabeta search to compute bestMove and value
-        if(depth == 0){
+        if (depth == 0 || state.getMoves().isEmpty())
+        {
             return evaluate(state);
         }
-        node.setBestMove(state.getMoves().get(0));
-        for(Move m : state.getMoves()){
+
+        for (Move m : state.getMoves())
+        {
             state.doMove(m);
             int newAlpha = alphaBetaMin(new DraughtsNode(state.clone()), 
                                                 alpha, beta, depth - 1);
@@ -168,6 +169,20 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
 
     /** A method that evaluates the given state. */
     // ToDo: write an appropriate evaluation function
-    int evaluate(DraughtsState state) { return 0; }
+    int evaluate(DraughtsState state) 
+    {
+        int[] pieces = state.getPieces();
+        int num_pieces = 0;
+        
+        for (int i = 1; i < pieces.length; i++)
+        {
+            if (pieces[i] != DraughtsState.EMPTY)
+            {
+                num_pieces++;
+            }
+        }
+        
+        return num_pieces;
+    }
     
 }
