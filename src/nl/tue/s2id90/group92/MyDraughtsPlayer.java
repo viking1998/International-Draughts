@@ -4,6 +4,7 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import nl.tue.s2id90.draughts.DraughtsState;
 import nl.tue.s2id90.draughts.player.DraughtsPlayer;
 import org10x10.dam.game.Move;
@@ -280,13 +281,14 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             if(pieces[i] == DraughtsState.BLACKPIECE)
                 score_black += blackscores[i];
             if(pieces[i] == DraughtsState.BLACKKING)
-                score_black += blackscores[i]+2;
+                score_black += blackscores[i]+20;
             if(pieces[i] == DraughtsState.WHITEPIECE)
                 score_white += whitescores[i];
             if(pieces[i] == DraughtsState.WHITEKING)
-                score_white += whitescores[i]+2;
+                score_white += whitescores[i]+20;
         }
-        
-        return score_white - score_black;
+        //Random random = new Random();
+        //int score_random = 0;// random.nextInt(3) - 1;
+        return score_white - score_black;// + score_random;
     }
 }
