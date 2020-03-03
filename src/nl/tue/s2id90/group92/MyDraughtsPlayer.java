@@ -205,14 +205,25 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
         return alpha;
     }
     
-    /** A method that evaluates the given state. */
+    /** A method that evaluates the given state. 
+     * Weights different checkers by their position on the board.
+     * Scores for black and white tiles mirrored.
+     * King checkers are worth more.
+     * 
+     * The table was initially referenced from:
+     * http://etheses.dur.ac.uk/7770/1/Masters_Thesis_Final.pdf?DDD10+ ,
+     * they have been modified to fit a 10x10 table and have been experimented
+     * with to provide sufficient results.
+     * 
+     * We also tried flat piece counting by colour and status, however 
+     * that proved inferior to this method.
+     */
     int evaluate(DraughtsState state) 
     {
         int[] pieces = state.getPieces();
-        int num_pieces = 0;
         int score_black = 0;
         int score_white = 0;
-        int[]blackscores ={0, 5, 4, 3, 4, 4,
+        int[]blackscores ={0, 5, 4, 3, 4, 4,//since we count from position 1, include a number for position 0.
                             4, 2, 2, 3, 2,
                               3, 4, 5, 4, 3,
                             6, 5, 5, 4, 4,
@@ -245,6 +256,8 @@ public class MyDraughtsPlayer  extends DraughtsPlayer{
             if(pieces[i] == DraughtsState.WHITEKING)
                 score_white += whitescores[i]+20;
         }
+        // We tried including a random factor, however the player performed worse,
+        // the nondeterminism was not worth it.
         return score_white - score_black;
     }
 }
